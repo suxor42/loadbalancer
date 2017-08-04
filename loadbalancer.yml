@@ -1,0 +1,25 @@
+---
+- name: Install web playbook
+  hosts: all
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: Install nginx
+    apt: name={{item}} state=present update_cache=yes cache_valid_time=86400
+    with_items:
+      - nginx
+
+  - name: nginx config
+    template: src=nginx.conf.loadbalancer dest=/etc/nginx/nginx.conf
+
+  - name: Ensure service started
+    systemd: state=restarted name=nginx
+
+  - name: Copy monitoring script
+    copy: src=eZServerMonitor.sh dest=/home/ubuntu owner=ubuntu group=ubuntu mode=0755
+
+  - name: Copy private key
+    copy: src=id_rsa dest=/home/ubuntu/.ssh/id_rsa owner=ubuntu group=ubuntu mode=0700

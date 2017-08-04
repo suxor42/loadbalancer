@@ -1,0 +1,31 @@
+---
+- name: Install web playbook
+  hosts: all
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: Install nginx
+    apt: name={{item}} state=present update_cache=yes cache_valid_time=86400
+    with_items:
+      - nginx
+
+  - name: Create www root
+    file: path=/var/www/ state=directory mode=0755 owner=www-data group=www-data
+
+  - name: nginx config
+    template: src=nginx.conf dest=/etc/nginx/nginx.conf
+
+  - name: index.html
+    template: src=index.html dest=/var/www/index.html
+
+  - name: Ensure service started
+    systemd: state=restarted name=nginx
+
+  - name: Add ssh keys from github to authorized_keys
+    authorized_key:
+      user: ubuntu
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKSNfyvyorY6RysA/MU1KftQevm4h4S91Idhgm/C9rxh0I8eUtOZy+Eeo1RUjhWmwxcumH/LtD+gE3opr75X8WWezpQAm/MBEqdGggkR2hzbcIANSvJAp33/26RgUUxEqnqm5+R7BvyELekxXmYXScUhPy3yuoyxyysQjV3alr8c2iHxMZz9NuOoWqpEavOUI35syrn+CQYoj6MKO8RsmUqwS3YmZhPcZ+2hwfIAfahOzeyBn39Q7T++vxjhzVYyrWR00Iq/+3oq0w93Pllx//B8yFUJ+OWi4oOLAQr8OGZSmen6sJQ2JpB9iSQfL+Ed5QCXbkIODeFSvY3umVorpJ vagrant"
+      manage_dir: yes

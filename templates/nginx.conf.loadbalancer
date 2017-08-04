@@ -1,0 +1,22 @@
+user    www-data;
+
+events {
+    worker_connections  1024;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    upstream web {
+        server 33.33.33.80;
+        server 33.33.33.81;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://web;
+        }
+    }
+}
